@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLARIS TERRARIA 16-BIT | Edição Definitiva</title>
+<link rel="stylesheet" href="css/solaris.css">
+</head>
+<body class="opening-active">
+<section id="opening" aria-label="Abertura do Solaris">
+  <div class="opening-stage">
+    <canvas id="prologueArt" width="960" height="420" aria-hidden="true"></canvas>
+
+    <strong id="shotName"></strong>
+    <div id="openingCaption" role="status">Carregando Solaris…</div>
+    <div id="openingActions" hidden>
+      <button type="button" id="voiceToggle" aria-pressed="true">Vozes ligadas</button>
+      <button type="button" id="skipStory">Pular história</button>
+      <button type="button" id="nextStory">Continuar ▸</button>
+    </div>
+  </div>
+  <section id="creator" hidden aria-labelledby="creatorTitle">
+    <div class="creator-card">
+      <h1 id="creatorTitle">Seu personagem</h1>
+      <div class="heroStudio"><div class="portraitFrame"><canvas id="avatarPreview" width="576" height="336" aria-label="Prévia do personagem"></canvas></div>
+      <div class="previewTools"><button id="turnHero" type="button">↔ Virar</button><button id="zoomHero" type="button" aria-pressed="false">Rosto</button><button id="walkHero" type="button" aria-pressed="false">Andar</button></div></div>
+      <div class="identity" id="identityPanel"><label for="heroName">Nome</label><input id="heroName" maxlength="24" autocomplete="off" placeholder="Seu nome">
+      <fieldset class="genderPick" id="genderPanel"><legend>Gênero</legend><label><input type="radio" id="genderMan" name="heroGender" value="Homem"> Homem</label><label><input type="radio" id="genderWoman" name="heroGender" value="Mulher"> Mulher</label></fieldset>
+      <label>Traje inicial <select id="costumePick"><option value="" disabled>Personalizado</option><option value="0">Base</option><option value="1">Explorador</option><option value="2">Cavaleiro</option><option value="3">Mago</option><option value="4">Sombra</option></select></label><button id="randomHero" type="button">⚄ Sortear personagem</button></div>
+      <nav id="creatorDock" aria-label="Categorias do personagem"></nav>
+      <section id="campaignMode"><h2>Dificuldade da campanha</h2><div id="modeButtons"></div><p id="modeInfo" aria-live="polite"></p></section>
+      <section id="lookFields" hidden aria-labelledby="rackTitle"><header class="rackHeader"><h2 id="rackTitle"></h2><div id="rackNav"><button id="prevRack" type="button" aria-label="Página anterior">◀</button><span id="rackPage"></span><button id="nextRack" type="button" aria-label="Próxima página">▶</button></div></header><div id="rackGrid"></div></section><div id="mixFields"></div>
+      <div class="creatorFooter"><label><input id="skipIntro" type="checkbox"> Pular introdução</label><button id="beginStory" type="button">Começar ▸</button></div>
+      <p id="nameError" role="status" hidden>Digite um nome para começar.</p>
+    </div>
+  </section>
+</section>
+<script src="js/core/progresso.js"></script>
+<script src="js/avatar/guarda-roupa.js"></script>
+<script src="assets/avatar/atlas.js"></script>
+<script src="js/avatar/materiais.js"></script>
+<script src="js/avatar/acessorios.js"></script>
+<script src="js/avatar/caminhada.js"></script>
+<script src="js/avatar/personagem.js"></script>
+<script src="assets/avatar/atelier.js"></script>
+<script src="js/avatar/pecas-ajustadas.js"></script>
+<script src="js/avatar/figurino.js"></script>
+<script src="js/jogo/cenarios.js"></script>
+<script src="js/interface/criacao-e-historia.js"></script>
+
+
+<div class="top-bar">
+  <div style="display:flex; gap:4px;">
+    <button class="btn" onclick="goTitle(this)">☀ INÍCIO</button>
+    <button class="btn" onclick="goMap(this)">🌀 PORTAIS</button>
+    <button class="btn btn-shop" onclick="goShop(this)">🏪 LOJA</button>
+
+    <button class="btn" onclick="goWeapons(this)">🔫 ARMAS</button>
+    <button class="btn" onclick="goPets(this)">🐾 PETS</button>
+    <button class="btn" onclick="openControls()">⚙ Configurações</button>
+    <button class="btn" onclick="openGuide()">Tutorial</button>
+    <button class="btn" id="soundBtn" onclick="toggleSound(this)">🔊</button>
+  </div>
+  <div id="statusText" style="letter-spacing:0.3px; color:#fff; font-size:11.5px;">SOLARIS 16-BIT</div>
+  <div style="display:flex; align-items:center; gap:7px;">
+    <span id="coinCounter" style="color:#ffd166;">🌻 0</span>
+    <span id="deathCounter" style="color:#ff758f;">💀 0</span>
+    <button class="btn" onclick="goTitle(this)" title="Voltar ao início">✕</button>
+  </div>
+</div>
+
+<dialog id="controlDialog" aria-labelledby="configTitle"><h2 id="configTitle">Configurações de controles</h2>
+<fieldset class="aimModes"><legend>Como você quer atirar?</legend>
+<label><input type="radio" name="aimMode" id="aimClassic" onchange="draft.arrowFire=false;renderControls()"> Mira clássica <small>Mouse para mirar ou tecla de tiro para mirar no chefe.</small></label>
+<label><input type="radio" name="aimMode" id="aimArrows" onchange="draft.arrowFire=true;renderControls()"> Atirar com as setas <small>Segure uma seta para disparar. Combine duas para mirar na diagonal.</small></label></fieldset>
+<h3>Teclas do jogo</h3><p>Selecione uma ação e aperte a nova tecla. Esc cancela a troca.</p><div id="bindings"></div><p id="controlNote" role="status"></p>
+<details id="touchEditor"><summary>Posição dos botões de toque</summary><p>Arraste os botões dentro da área de jogo.</p><div id="layoutField"></div></details>
+<div class="configActions"><button class="btn" onclick="draft=defaults();capturing=null;renderControls()">Restaurar padrão</button><button class="btn" onclick="dialog.close()">Cancelar</button><button class="btn btn-shop" onclick="saveControls()">Salvar</button></div></dialog>
+
+<canvas id="game" width="800" height="450"></canvas>
+
+<button class="btn" id="talkTrail" hidden type="button" onclick="talkTrail()">Conversar com o guia</button>
+<section hidden id="guideDialog" aria-labelledby="guideTitle" aria-describedby="guideLine"><div class="guideRow"><img alt="" src="assets/atelier/guia.png"><div><strong id="guideTitle">Guia do Solaris</strong><p id="guideLine" aria-live="polite"></p><div class="guideActions" id="guideChoices"><button class="btn" type="button" onclick="finishGuide()">Pular tutorial</button><button class="btn btn-shop" type="button" id="guideNext" onclick="advanceGuide()">Próximo passo</button></div></div></div></section>
+<div class="footer-hint">
+  Mover: <kbd>A</kbd> <kbd>D</kbd> &nbsp;|&nbsp;
+  Pular / Parry: <kbd>Espaço</kbd> &nbsp;|&nbsp;
+  Mirar & Atirar (Boss): <kbd>Mouse</kbd> ou <kbd>J</kbd> &nbsp;|&nbsp;
+  Impulso: <kbd>Shift</kbd> &nbsp;|&nbsp; Pausa: <kbd>P</kbd> &nbsp;|&nbsp;
+  Portais: <kbd>Esc</kbd> &nbsp;|&nbsp; Toque: esq/centro = mover, direita = pular
+</div>
+
+<script src="js/jogo/travessia.js"></script>
+<script src="js/jogo/guia.js"></script>
+<script src="js/jogo/campanha.js"></script>
+<script src="js/jogo/simulacao.js"></script>
+<script src="js/jogo/desenho.js"></script>
+<script src="js/jogo/controles-e-loop.js"></script>
+</body>
+</html>
